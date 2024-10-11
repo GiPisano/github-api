@@ -2,14 +2,15 @@ const query = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const searchType = document.getElementById("searchType");
 const results = document.getElementById("results");
+const loader = document.getElementById("loader");
 
 // EventListener for the search btn
 searchBtn.addEventListener("click", function () {
   const queryValue = searchInput.value.trim();
   const typeValue = searchType.value;
 
-  if (queryValue.length === 0) {
-    alert("Please enter a search term.");
+  if (queryValue.length < 3) {
+    alert("Please enter at least 3 characters.");
     return;
   }
 
@@ -20,6 +21,9 @@ searchBtn.addEventListener("click", function () {
 function searchGitHub(query, type) {
   let url = "";
 
+  // Show loader while fetching data
+  showLoader();
+
   if (type === "repositories") {
     url = `https://api.github.com/search/repositories?q=${query}`;
   } else if (type === "users") {
@@ -29,16 +33,36 @@ function searchGitHub(query, type) {
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
+      hideLoader();
+
       if (type === "repositories") {
-        displayRepositories(data.items);
+        if (data.items.length === 0) {
+          results.innerHTML = `<p class="no-found-error">No repository found with the name "${query}".</p>`;
+        } else {
+          displayRepositories(data.items);
+        }
       } else {
-        displayUsers(data.items);
+        if (data.items.length === 0) {
+          results.innerHTML = `<p class="no-found-error">No user/organization found with the name "${query}".</p>`;
+        } else {
+          displayUsers(data.items);
+        }
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      results.innerHTML = "<p>An error occurred during the search.</p>";
+      results.innerHTML = `<p class="no-found-error">An error occurred during the search.</p>`;
     });
+}
+
+/// Function to show loader
+function showLoader() {
+  loader.style.display = "block";
+}
+
+// Function to hide loader
+function hideLoader() {
+  loader.style.display = "none";
 }
 
 // Display results for repositories
@@ -97,7 +121,7 @@ function displayUsers(users) {
     col.classList.add("col-12", "col-md-6", "col-lg-3", "mb-4");
 
     const card = `
-      <div class="card h-100">
+      <div class="card">
         <div class="card-header text-center">
           <img src="${user.avatar_url}" alt="User Avatar" class="img-fluid rounded-circle mb-2" style="width: 80px; height: 80px;">
           <h5 class="card-title">${user.login}</h5>
