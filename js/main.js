@@ -79,9 +79,12 @@ function displayRepositories(repositories) {
     const card = `
       <div class="card h-100">
         <div class="card-header text-center bg-primary text-white">
-          <h5 class="card-title">${repo.name}</h5>
+           <img src="${
+             repo.owner.avatar_url
+           }" alt="User Avatar" class="img-fluid rounded-circle mb-2" style="width: 80px; height: 80px;">
         </div>
         <div class="card-body">
+        <h5 class="card-title">${repo.name}</h5>
           <p class="card-text">${
             repo.description || "No description available."
           }</p>
