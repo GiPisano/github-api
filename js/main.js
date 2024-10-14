@@ -47,11 +47,54 @@ function createPagination(totalPages, query, type) {
       <a class="page-link" href="#">&laquo;</a>
     </li>`;
 
+  const maxVisiblePages = 10; // Number of max visible pages
+
+  // Show the first page
+  if (totalPages > 1) {
+    paginationHTML += `
+      <li class="page-item ${currentPage === 1 ? "active" : ""}">
+        <a class="page-link" href="#">1</a>
+      </li>`;
+  }
+
+  // Add ellipsis if current page is greater than 5
+  if (currentPage > 5) {
+    paginationHTML += `
+      <li class="page-item disabled">
+        <span class="page-link">...</span>
+      </li>`;
+  }
+
+  // Calculate start and end page numbers
+  let startPage = Math.max(2, currentPage - 4);
+  let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 2);
+
+  // Adjust start page if end page is close to total pages
+  if (endPage === totalPages - 1 && endPage - startPage < maxVisiblePages - 2) {
+    startPage = Math.max(2, endPage - (maxVisiblePages - 3));
+  }
+
   // Loop to generate the numbered pages
-  for (let i = 1; i <= totalPages; i++) {
+  for (let i = startPage; i <= endPage; i++) {
     paginationHTML += `
       <li class="page-item ${currentPage === i ? "active" : ""}">
         <a class="page-link" href="#">${i}</a>
+      </li>`;
+  }
+
+  // Add ellipsis if there are more pages after the last visible one
+  if (endPage < totalPages - 1) {
+    paginationHTML += `
+      <li class="page-item disabled">
+        <span class="page-link">...</span>
+      </li>`;
+  }
+
+  // Show the last page
+  if (totalPages > 1) {
+    paginationHTML += `
+      <li class="page-item ${currentPage === totalPages ? "active" : ""}">
+        <a class="page-link" href="#">${totalPages}</a>
       </li>`;
   }
 
@@ -63,6 +106,7 @@ function createPagination(totalPages, query, type) {
 
   paginationElement.innerHTML = paginationHTML;
 
+  // Add event listeners to pagination links
   paginationElement.querySelectorAll(".page-link").forEach((link, i) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
