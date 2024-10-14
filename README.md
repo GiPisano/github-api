@@ -15,8 +15,5 @@ Integriamo una validazione minimale: la ricerca deve partire solo se l’utente 
 Mostriamo un messaggio in caso non venga restituito nessun risultato (es. non esiste una repo con il nome che è stato cercato).
 Aggiungiamo un loader che sarà mostrato mentre siamo in attesa di ottenere i risultati.
 
-### Bonus 1
-Implementiamo un debounce: appena l’utente smette di digitare nell’input, dopo 700ms parte la chiamata di ricerca all’API.
-
-### Bonus 2
+### Bonus 
 La chiamata API base restituisce solo 30 risultati. Integriamo una funzionalità base di paginazione: due pulsanti (avanti / indietro) che ci permettano di navigare tra le pagine.
