@@ -17,42 +17,62 @@ searchBtn.addEventListener("click", function () {
   searchGitHub(queryValue, typeValue);
 });
 
+let currentPage = 1;
+const perPage = 28;
+const paginationElement = document.getElementById("pagination");
+
 // Function to search for type based on the input query
-function searchGitHub(query, type) {
-  let url = "";
-
-  // Show loader while fetching data
+function searchGitHub(query, type, page = 1) {
+  const url = `https://api.github.com/search/${type}?q=${query}&per_page=${perPage}&page=${page}`;
   showLoader();
-
-  if (type === "repositories") {
-    url = `https://api.github.com/search/repositories?q=${query}`;
-  } else if (type === "users") {
-    url = `https://api.github.com/search/users?q=${query}`;
-  }
 
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
       hideLoader();
-
-      if (type === "repositories") {
-        if (data.items.length === 0) {
-          results.innerHTML = `<p class="no-found-error">No repository found with the name "${query}".</p>`;
-        } else {
-          displayRepositories(data.items);
-        }
+      if (data.items.length) {
+        type === "repositories"
+          ? displayRepositories(data.items)
+          : displayUsers(data.items);
+        createPagination(Math.ceil(data.total_count / perPage), query, type);
       } else {
-        if (data.items.length === 0) {
-          results.innerHTML = `<p class="no-found-error">No user/organization found with the name "${query}".</p>`;
-        } else {
-          displayUsers(data.items);
-        }
+        results.innerHTML = `<p>No ${type} found.</p>`;
       }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      results.innerHTML = `<p class="no-found-error">An error occurred during the search.</p>`;
     });
+}
+
+function createPagination(totalPages, query, type) {
+  let paginationHTML = `
+    <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+      <a class="page-link" href="#">&laquo;</a>
+    </li>`;
+
+  // Loop to generate the numbered pages
+  for (let i = 1; i <= totalPages; i++) {
+    paginationHTML += `
+      <li class="page-item ${currentPage === i ? "active" : ""}">
+        <a class="page-link" href="#">${i}</a>
+      </li>`;
+  }
+
+  paginationHTML += `
+    <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+      <a class="page-link" href="#">&raquo;</a>
+    </li>
+  `;
+
+  paginationElement.innerHTML = paginationHTML;
+
+  paginationElement.querySelectorAll(".page-link").forEach((link, i) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (i === 0 && currentPage > 1) currentPage--; // "Previous"
+      else if (i === totalPages + 1 && currentPage < totalPages)
+        currentPage++; // "Next"
+      else if (i > 0 && i <= totalPages) currentPage = i; // numbers
+      searchGitHub(query, type, currentPage);
+    });
+  });
 }
 
 /// Function to show loader
